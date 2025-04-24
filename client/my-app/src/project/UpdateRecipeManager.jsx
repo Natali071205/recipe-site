@@ -83,7 +83,7 @@ const UpdateRecipeManager = ({ recipeId }) => {
     const formData = new FormData();
     if (image) formData.append("image", image);
 
-    // Add only changed fields to the FormData
+ 
     Object.keys(recipeData).forEach((key) => {
       if (recipeData[key] !== null && recipeData[key] !== undefined) {
         formData.append(key, Array.isArray(recipeData[key]) ? JSON.stringify(recipeData[key]) : recipeData[key]);
@@ -121,7 +121,7 @@ const UpdateRecipeManager = ({ recipeId }) => {
         mx: "auto",
         border: "1px solid #ccc",
         borderRadius: 2,
-        mt: 5, // מרווח עליון
+        mt: 5, 
       }}
     >
       <Typography variant="h4" gutterBottom>

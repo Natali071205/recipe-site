@@ -11,7 +11,6 @@ const getAllResponses = (req, res) => {
 // מקבל תגובה לפי ID
 const getResponseById = async (req, res) => {
   try {
-    
     const response = await Responses.find({recipeId:req.params.recipeId}).populate("userCode").populate("recipeId");
     if (!response) {
       return res.status(400).send("Response not found");
@@ -25,14 +24,11 @@ const getResponseById = async (req, res) => {
 // מוסיף תגובה חדשה
 const addResponse = async (req, res) => {
   try {
-    console.log(req.body);
-    
+    console.log(req.body);  
     const { userCode, content } = req.body;
     let newResponse = new Responses( req.body);
     console.log('new',newResponse);
-    
     await newResponse.save();
-    
     res.send(await newResponse.populate("userCode"));
   } catch (err) {
     res.status(500).send({"Error": err});

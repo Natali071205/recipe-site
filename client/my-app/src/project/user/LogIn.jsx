@@ -60,7 +60,7 @@ export default function LogIn() {
       }
     } catch (err) {
       console.error(err);
-      nav('/singup');
+      nav('/signup');
     }
   };
 
@@ -154,8 +154,8 @@ export default function LogIn() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="/singup" variant="body2" sx={{ color: 'black' }}>
-                  {"אין לך חשבון? לחץ להרשמה"}
+                <Link href="/signup" variant="body2" sx={{ color: 'black' }}>
+                  {"אין לך חשבון?  לחץ להרשמה"}
                 </Link>
               </Grid>
             </Grid>

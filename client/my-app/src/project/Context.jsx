@@ -1,17 +1,40 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
+
 export const UserContext = createContext();
 
-export const UserProvider=({children})=>{
-    
-    const [user,setUser]=useState();
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
 
-    const login = (newUser)=>{
-        if(newUser!=null)
-            setUser(newUser)
+  // 🚀 טוען את המשתמש מה-localStorage כשנטען הדף
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
-    return(
-        <UserContext.Provider value={{login,user}}>
-            {children}
-        </UserContext.Provider>
-    )
-}
+  }, []);
+
+  const login = (newUser) => {
+    if (newUser != null) {
+      setUser(newUser);
+      localStorage.setItem("user", JSON.stringify(newUser)); // ✅ שמירה
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user"); // ❌ מחיקה
+  };
+
+  const updateUser = (user) => {
+    if (user) {
+      setUser(user);
+      localStorage.setItem("user", JSON.stringify(user)); // ✅ עדכון גם ב-localStorage
+    }
+  };
+
+  return (
+    <UserContext.Provider value={{ user, login, logout, updateUser }}>
+      {children}
+    </UserContext.Provider>
+  );
+};

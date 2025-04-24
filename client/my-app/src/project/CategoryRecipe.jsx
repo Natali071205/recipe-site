@@ -1,23 +1,33 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
-import { Container, Grid, Card, CardContent, CardMedia, Typography, Box, CircularProgress, IconButton, CardActions, Button } from '@mui/material';
+import { Container, Grid, Card, CardContent, CardMedia, Typography, Box, CircularProgress, IconButton, CardActions, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { UserContext } from './Context';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link } from 'react-router-dom';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 
 const CategoryRecipe = () => {
   const { categoryId, categoryName } = useLocation().state;
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(UserContext);
+  
+  // דיאלוג למחיקת מתכון
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [recipeToDelete, setRecipeToDelete] = useState(null);
 
   useEffect(() => {
     const getAllRecipes = async () => {
       try {
         const response = await axios.get(`http://localhost:3000/recipes/category/${categoryId}`);
-        setRecipes(response.data);
+        // הוספת שדה חדש לכל מתכון שמציין אם הלייק הוספת או לא
+        const recipesWithLikes = response.data.map(recipe => ({
+          ...recipe,
+          isLiked: false,  // מתכון התחלה: הלייק הוא לא פעיל
+        }));
+        setRecipes(recipesWithLikes);
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -30,29 +40,49 @@ const CategoryRecipe = () => {
     try {
       await axios.delete(`http://localhost:3000/recipes/${recipeId}`);
       setRecipes(prevRecipes => prevRecipes.filter(recipe => recipe._id !== recipeId));
+      setOpenDeleteDialog(false);
     } catch (err) {
       console.error('Error deleting recipe:', err);
     }
   };
 
   const updateRecipeLikes = async (recipe) => {
-    console.log(recipe);
-    
     try {
-      const response = await axios.put(`http://localhost:3000/recipes/${recipe._id}`, { "likes": recipe.likes+1 });
+      const updatedLikes = recipe.likes + 1;
+      const response = await axios.put(`http://localhost:3000/recipes/${recipe._id}`, { likes: updatedLikes });
       console.log('response', response.data);
-      // setRecipes([...recipes,{...recipe,likes:recipe.likes+1}])
-      let arr = [...recipes];
-      arr.forEach(r=>{
-        if(r._id==recipe._id)
-          r.likes = recipe.likes+1;
-      })
-      console.log('arr ',arr);
-      setRecipes(arr)
-      
+
+      // עדכון הלייקים במערך המתכונים
+      let updatedRecipes = recipes.map(r => 
+        r._id === recipe._id ? { ...r, likes: updatedLikes, isLiked: true } : r
+      );
+      setRecipes(updatedRecipes);
     } catch (err) {
       console.error('Error updating likes:', err);
     }
+  };
+
+  const toggleLike = (recipe) => {
+    if (!recipe.isLiked) {
+      updateRecipeLikes(recipe);
+    } else {
+      console.log('Already liked');
+    }
+  };
+
+  const handleDeleteRecipe = (recipeId) => {
+    setRecipeToDelete(recipeId);
+    setOpenDeleteDialog(true);
+  };
+
+  const confirmDeleteRecipe = () => {
+    if (recipeToDelete) {
+      deleteRecipe(recipeToDelete);
+    }
+  };
+
+  const cancelDeleteRecipe = () => {
+    setOpenDeleteDialog(false);
   };
 
   if (loading) {
@@ -114,10 +144,10 @@ const CategoryRecipe = () => {
                   </CardContent>
                 </Link>
 
-                {/* כפתור הלייק נמצא כאן, מחוץ ל-Link */}
-                <Box 
-                  display="flex" 
-                  alignItems="center" 
+              
+                <Box
+                  display="flex"
+                  alignItems="center"
                   sx={{
                     padding: '5px 10px',
                     borderRadius: '50px',
@@ -125,52 +155,80 @@ const CategoryRecipe = () => {
                     marginBottom: '10px',
                     justifyContent: 'center',
                     color: 'black',
-                    position: 'absolute', // מיקום עליון/תחתון
-                    left: '10px', // מיקום בצד שמאל
-                    bottom: '10px', // מרחק מהתחתית
+                    position: 'absolute', 
+                    left: '10px', 
+                    bottom: '10px', 
                   }}
                 >
                   <CardActions>
                     <Button
                       onClick={(e) => {
-                        e.stopPropagation(); // מונע מהלחיצה להפעיל את ה-Link
-                        // updateRecipeLikes(recipe._id, recipe.likes + 1);
-                        updateRecipeLikes(recipe);
-
+                        e.stopPropagation(); 
+                        toggleLike(recipe);
                       }}
                     >
                       <Typography variant="body2" sx={{ marginRight: '5px', color: 'black' }}>
                         {recipe.likes || 0}
                       </Typography>
-                      <ThumbUpIcon sx={{ color: 'black' }} /> {/* שינוי צבע לאייקון */}
+                      {/* הצגת האייקון הריק או המלא בהתאם למצב הלייק */}
+                      {recipe.isLiked ? (
+                        <ThumbUpIcon sx={{ color: 'black' }} />
+                      ) : (
+                        <ThumbUpOffAltIcon sx={{ color: 'black' }} />
+                      )}
                     </Button>
                   </CardActions>
                 </Box>
-              </Card>
 
-              {user && user.isAdmin && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 10,
-                    right: 10,
-                  }}
-                >
-                  <IconButton
-                    sx={{ color: 'black' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteRecipe(recipe._id);
+                {/* כפתור מחיקת המתכון */}
+                {user && user.isAdmin && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 10,
+                      right: 10,
                     }}
                   >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-              )}
+                    <IconButton
+                      sx={{ color: 'black' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteRecipe(recipe._id);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </Card>
             </Grid>
           ))
         )}
       </Grid>
+
+      {/* דיאלוג למחיקת מתכון */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={cancelDeleteRecipe}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        sx={{ direction: 'rtl' }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"האם אתה בטוח שברצונך למחוק את המתכון?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            פעולה זו תסיר את המתכון לצמיתות. האם אתה בטוח שברצונך להמשיך?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDeleteRecipe}>לא למחוק</Button>
+          <Button onClick={confirmDeleteRecipe} autoFocus>
+            למחוק
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

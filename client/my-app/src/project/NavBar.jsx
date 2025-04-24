@@ -15,40 +15,35 @@ import CottageIcon from '@mui/icons-material/Cottage';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { UserContext } from './Context';
+import Search from './Search';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'; // אייקון התנתקות
+import PersonIcon from '@mui/icons-material/Person'; // אייקון פרופיל
 
 const NavBar = () => {
-
-  const { user } = useContext(UserContext);
-  console.log('user', user);
-
-  const userpages = [{ name: "כל המתכונים", route: 'home' },
-  { name: "אודות", route: 'about' },
-  { name: "התחברות", route: 'login' },
-  { name: "הרשמה", route: 'singup' }
-  ]
-
-
+  const { user, logout } = useContext(UserContext); 
+  const navigate = useNavigate();
+  
+  const userpages = [
+    { name: "התנתקות", route: 'home', icon: <ExitToAppIcon /> },  // הוספת האייקון של התנתקות
+    { name: "עדכון פרופיל", route: 'UpdateUser', icon: <PersonIcon /> } // הוספת האייקון של פרופיל
+  ];
 
   const pages = user && user.isAdmin
     ? [
       { name: "כל המתכונים", route: 'home' },
       { name: "אודות", route: 'about' },
-      { name: "התחברות", route: 'login' },
-      { name: "הרשמה", route: 'singup' },
       { name: "הוספת קטגוריה", route: 'AddCategoryManager' },
       { name: "הוספת מתכון", route: 'AddRecipeMeneger' }
-
     ]
     : [
       { name: "כל המתכונים", route: 'home' },
       { name: "אודות", route: 'about' },
       { name: "התחברות", route: 'login' },
-      { name: "הרשמה", route: 'singup' }
+      { name: "הרשמה", route: 'signup' }
     ];
 
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
-  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -72,31 +67,59 @@ const NavBar = () => {
     handleCloseNavMenu();
   };
 
+  const handleLogout = () => {
+    logout(); 
+    handleCloseUserMenu(); 
+    navigate('/home');
+  };
+
   return (
     <AppBar position="static" sx={{ backgroundColor: '#dc4337', position: 'fixed', top: '0px', zIndex: 999 }}>
       <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Link to="/home">
-            <CottageIcon sx={{ display: { color: 'white', xs: 'none', md: 'flex' }, mr: 1 }} />
-          </Link>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="#"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            מתכונים
-          </Typography>
-
+        <Toolbar disableGutters sx={{ display: 'flex' }}>
+          {user && (
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt={user.username} src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {userpages.map((page, index) => (
+                  <MenuItem key={index} onClick={() => {
+                    if (page.name === "התנתקות") {
+                      handleLogout(); 
+                    } else {
+                      handleNavigate(page); 
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      {page.icon}
+                      <Typography textAlign="center" sx={{ ml: 1 }}>
+                        {page.name}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+          )}
+          <Search />
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
@@ -130,6 +153,19 @@ const NavBar = () => {
               ))}
             </Menu>
           </Box>
+
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, flexDirection: 'row-reverse', paddingRight: '38px' }}>
+            {pages.map((page, index) => (
+              <Button
+                key={index}
+                onClick={() => handleNavigate(page)}
+                sx={{ my: 2, color: 'black', display: 'block' }}
+              >
+                {page.name}
+              </Button>
+            ))}
+          </Box>
+
           <CottageIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
             variant="h5"
@@ -143,55 +179,33 @@ const NavBar = () => {
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'black',
               textDecoration: 'none',
             }}
           >
-            natali recipes
+            מתכונים
           </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page, index) => (
-              <Button
-                key={index}
-                onClick={() => handleNavigate(page)}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page.name}
-              </Button>
-            ))}
-          </Box>
-          {
-            user &&
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user.username} src="/static/images/avatar/2.jpg" />
-                </IconButton>
-              </Tooltip>
-              <Menu
-                sx={{ mt: '45px' }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              >
-                {userpages.map((page,index) => (
-                  <MenuItem key={index} onClick={() => handleNavigate(page)}>
-                  <Typography textAlign="center">{page.name}</Typography>
-                </MenuItem>
-                ))}
-              </Menu>
-            </Box>
-          }
+
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            href="#"
+            sx={{
+              mr: 2,
+              display: { xs: 'none', md: 'flex' },
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              letterSpacing: '.3rem',
+              color: 'black',
+              textDecoration: 'none',
+            }}
+          >
+            מתכונים
+          </Typography>
+          <Link to="/home">
+            <CottageIcon sx={{ display: { color: 'black', xs: 'none', md: 'flex' }, mr: 1 }} />
+          </Link>
         </Toolbar>
       </Container>
     </AppBar>

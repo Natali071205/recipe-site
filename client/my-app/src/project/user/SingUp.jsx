@@ -42,18 +42,23 @@ export default function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
     if (errors.username || errors.email || errors.password || !user.username || !user.email || !user.password) {
       setType("error");
       setMessage("יש לתקן את כל השגיאות לפני שליחה");
       return;
     }
     try {
+      console.log(':)');
+      
       const response = await axios.post('http://localhost:3000/users/signup', user);
       if (response.status === 200) {
         login(response.data.newUser);
+        localStorage.setItem('user', JSON.stringify(response.data.newUser)); // ✅ שומר ב-localStorage
         setType("success");
         nav("/home");
       }
+      
     } catch (error) {
       console.log("Error:", error);
     }
@@ -117,6 +122,7 @@ export default function SignUp() {
                 fullWidth
                 name="password"
                 label="סיסמא"
+                onChange={handleChange}
                 type={showPassword ? "text" : "password"} 
                 error={!!errors.password}
                 helperText={errors.password}

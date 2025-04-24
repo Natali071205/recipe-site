@@ -1,13 +1,12 @@
 const Users = require("../models/usersModel");
 
-// מקבל את כל המשתמשים
+
 const getAllUsers = (req, res) => {
   Users.find()
     .then(result => res.send(result))
     .catch(err => res.status(400).send("Error", err));
 };
 
-// מקבל משתמש לפי ID
 const getUserById = async (req, res) => {
   try {
     const user = await Users.findById(req.params.id);
@@ -20,13 +19,11 @@ const getUserById = async (req, res) => {
   }
 };
 
-// מוסיף משתמש חדש
+
 const addUser = async (req, res) => {
   try {
     const { username, password, email } = req.body;
     const newUser = new Users({ username, password, email, isAdmin: false });
-    console.log('new user', newUser);
-
     await newUser.save();
     res.send({ "User added successfully": newUser });
   } catch (err) {
@@ -39,9 +36,9 @@ const login = async (req, res) => {
     const { username, password } = req.body;
     const user = await Users.findOne({ username: username, password: password });
     if (!user) {
-      return res.status(404).send({ message: "User not found" });  // במקרה של משתמש לא נמצא
+      return res.status(404).send({ message: "User not found" });  
     }
-    return res.status(200).send(user);  // אם המשתמש נמצא
+    return res.status(200).send(user); 
   } catch (err) {
     return res.status(500).send({ message: "Internal Server Error", error: err });
   }
@@ -52,18 +49,17 @@ const signup = async (req, res) => {
     const { username, password, email } = req.body;
     const user = await Users.findOne({ username: username, password: password });
     if (!user) {
-      const newUser = new Users({ username: username, password: password, email: email }) // במקרה של משתמש לא נמצא
+      const newUser = new Users({ username: username, password: password, email: email }) 
       await newUser.save();
       return res.send({ newUser})
     }
-    return res.status(400).send({"user already exist":user});  // אם המשתמש נמצא
+    return res.status(400).send({"user already exist":user});  
   } catch (err) {
     return res.status(500).send({ message: "Internal Server Error", error: err });
   }
 
 }
 
-// מוחק משתמש לפי ID
 const deleteUser = (req, res) => {
   Users.findByIdAndDelete(req.params.id)
     .then(user => {
@@ -76,7 +72,7 @@ const deleteUser = (req, res) => {
     .catch(err => res.status(500).send("Error", err));
 };
 
-// מעדכן משתמש
+
 const updateUser = async (req, res) => {
   try {
     const selectedUser = await Users.findByIdAndUpdate(req.params.id, req.body, { new: true });

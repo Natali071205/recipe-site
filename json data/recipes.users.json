@@ -1,0 +1,139 @@
+[{
+  "_id": {
+    "$oid": "6788eec5a15335a42ea2881d"
+  },
+  "username": "ayala",
+  "password": "a1a1a1",
+  "isAdmin": false,
+  "email": "a@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6788eee05622cbeaa5e90d16"
+  },
+  "username": "natal",
+  "password": "111111",
+  "email": "n@gmail.com",
+  "isAdmin": true
+},
+{
+  "_id": {
+    "$oid": "678f555bcea0248c329fe471"
+  },
+  "username": "Ester",
+  "password": "eseses",
+  "isAdmin": false,
+  "email": "e@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "678f575acea0248c329fe474"
+  },
+  "username": "רחלי",
+  "password": "rrrrrrr",
+  "isAdmin": false,
+  "email": "r@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b450b45ed1e62f7ec8d864"
+  },
+  "username": "iweohf",
+  "password": "wjkdefbh",
+  "isAdmin": false,
+  "email": "ejkwfb@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b452c2811ed571cca88463"
+  },
+  "username": "rasdfgh",
+  "password": "34ytt6",
+  "isAdmin": false,
+  "email": "r@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b454d4811ed571cca88466"
+  },
+  "username": "sjgv",
+  "password": "jvbjdjdjjd",
+  "isAdmin": false,
+  "email": "הטגע@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b4564b811ed571cca88469"
+  },
+  "username": "aaaa",
+  "password": "123456",
+  "isAdmin": false,
+  "email": "a@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b4575d811ed571cca88471"
+  },
+  "username": "djvjbdj",
+  "password": "123456",
+  "isAdmin": false,
+  "email": "jd@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b4587e811ed571cca8847f"
+  },
+  "username": "racheli",
+  "password": "123455",
+  "isAdmin": false,
+  "email": "r@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b458f4811ed571cca88484"
+  },
+  "username": "yaeli",
+  "password": "1234521",
+  "isAdmin": false,
+  "email": "y@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b4593a79b360d6d95b0e49"
+  },
+  "username": "tehila",
+  "password": "8765rf",
+  "isAdmin": false,
+  "email": "t@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67b4596e79b360d6d95b0e4e"
+  },
+  "username": "yyyy",
+  "password": "124hnbhf",
+  "isAdmin": false,
+  "email": "y@gmail.com",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67c9667b4e66257da6305665"
+  },
+  "username": "rrrrr",
+  "password": "1234567",
+  "isAdmin": false,
+  "email": "vjbff@gmail.com",
+  "__v": 0
+}]

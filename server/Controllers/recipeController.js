@@ -3,18 +3,15 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-// הגדרת תיקיית יעד להעלאת קבצים
 const uploadDir = './uploads';
 
-// אם התיקיה לא קיימת, ניצור אותה
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-// הגדרת Multer לאחסון הקובץ
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir); // התמונה תישמר בתיקיית uploads
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -23,15 +20,27 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// מקבל את כל המתכונים
 const getAllRecipes = (req, res) => {
   Recipes.find()
-    .populate("categoryCode") // מחבר את הקטגוריה
+    .populate("categoryCode")
     .then(result => res.send(result))
     .catch(err => res.status(400).send({ "Error": err }));
 };
 
-// מקבל מתכון לפי ID
+const getPopularRecipes = (req, res) => {
+  
+  Recipes.find()
+    .populate("categoryCode")
+    .sort({ likes: -1 })
+    .limit(6)
+    .then(result => {
+      console.log(result);
+      res.send(result);
+    })
+    .catch(err => res.status(400).send({ "Error": err }));
+};
+
+
 const getRecipeById = async (req, res) => {
   try {
     const recipe = await Recipes.findById(req.params.id).populate("categoryCode");
@@ -68,10 +77,7 @@ const addRecipe = async (req, res) => {
     const { name, publishDate, categoryCode, preparationTime, ingredients, preparationSteps, finalYield, likes } = req.body;
     console.log('name', name);
     console.log("Received data:", req.body);
-
-    // שמירת נתיב התמונה
     const imagePath = `/uploads/${req.file.filename}`;
-    // יצירת מתכון חדש עם הנתונים שהתקבלו
     const newRecipe = new Recipes({
       image: imagePath,
       publishDate: publishDate || Date.now(),
@@ -91,7 +97,6 @@ const addRecipe = async (req, res) => {
     res.status(500).send({ error: err.message });
   }
 };
-
 
 // מוחק מתכון לפי ID
 const deleteRecipe = (req, res) => {
@@ -119,6 +124,7 @@ const updateRecipe = async (req, res) => {
   }
 };
 
+
 module.exports = {
   getAllRecipes,
   getRecipeById,
@@ -126,5 +132,6 @@ module.exports = {
   deleteRecipe,
   updateRecipe,
   getRecipeByCategoryId,
+  getPopularRecipes,
   upload
 };

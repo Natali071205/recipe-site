@@ -1,18 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
+import FormHelperText from "@mui/material/FormHelperText";
 import { useNavigate } from "react-router-dom";
-import DeleteIcon from "@mui/icons-material/Delete";
+import Snackbar from "@mui/material/Snackbar";
+import SnackbarContent from "@mui/material/SnackbarContent";
+import { green, red } from "@mui/material/colors";
 
 const AddCategoryManager = () => {
   const [categoryData, setCategoryData] = useState({
     name: "",
   });
   const [image, setImage] = useState(null);
+  const [errors, setErrors] = useState({
+    name: "",
+    image: "",
+  });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState("success"); // 'success' or 'error'
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,11 +35,23 @@ const AddCategoryManager = () => {
     setImage(e.target.files[0]);
   };
 
+  const validateForm = () => {
+    const newErrors = { name: "", image: "" };
+    if (categoryData.name.length < 3) {
+      newErrors.name = "שם קטגוריה חייב להיות לפחות 3 תווים";
+    }
+    if (!image) {
+      newErrors.image = "יש להוסיף תמונה";
+    }
+    setErrors(newErrors);
+
+    return !newErrors.name && !newErrors.image;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!categoryData.name || !image) {
-      alert("נא למלא את כל השדות הנדרשים!");
+    if (!validateForm()) {
       return;
     }
 
@@ -44,55 +65,103 @@ const AddCategoryManager = () => {
       });
 
       if (response.status === 200) {
-        alert("הקטגוריה נוספה בהצלחה!");
+        setSnackbarMessage("הקטגוריה נוספה בהצלחה!");
+        setSnackbarType("success");
+        setOpenSnackbar(true);
         setCategoryData({ name: "" });
         setImage(null);
-        navigate("/categories"); // מפנה לעמוד של הקטגוריות לאחר הוספה
+        navigate("/home");
       } else {
-        alert("הוספת הקטגוריה נכשלה.");
+        setSnackbarMessage("הוספת הקטגוריה נכשלה.");
+        setSnackbarType("error");
+        setOpenSnackbar(true);
       }
     } catch (error) {
       console.error("Error adding category:", error);
-      alert("אירעה שגיאה במהלך הוספת הקטגוריה.");
+      setSnackbarMessage("אירעה שגיאה במהלך הוספת הקטגוריה.");
+      setSnackbarType("error");
+      setOpenSnackbar(true);
     }
   };
 
+  
+  useEffect(() => {
+    document.body.style.backgroundImage = 'url(/profilllee.jpg)';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.height = '100vh'; 
+    return () => {
+      document.body.style.backgroundImage = ""; 
+    };
+  }, []);
+
   return (
-    <Box
-      sx={{
-        p: 3,
-        maxWidth: 600,
-        mx: "auto",
-        border: "1px solid #ccc",
-        borderRadius: 2,
-        mt: 5, // מוסיף מרווח עליון
-      }}
-    >
-      <Typography variant="h4" gutterBottom>
-        הוספת קטגוריה חדשה
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="שם קטגוריה"
-          name="name"
-          value={categoryData.name}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
+    <>
+      <Box
+        sx={{
+          position: "relative",
+          top: "194px",
+          right: "13px",
+          p: 3,
+          maxWidth: 600,
+          mx: "auto",
+          border: "1px solid #ccc",
+          borderRadius: 2,
+          mt: 5,
+          backgroundColor: 'rgba(255, 255, 255, -0.2)',
+          padding: 4,
+          borderRadius: 2,
+          boxShadow: 3,
+          width: '100%',
+          maxWidth: 500,
+        }}
+      >
+        <Typography variant="h4" gutterBottom sx={{ textAlign: "center" }}>
+          הוספת קטגוריה חדשה
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="שם קטגוריה"
+            name="name"
+            value={categoryData.name}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+            error={Boolean(errors.name)}
+            helperText={errors.name}
+            autoFocus 
+          />
+          <TextField
+            type="file"
+            inputProps={{ accept: "image/*" }}
+            onChange={handleImageChange}
+            fullWidth
+            margin="normal"
+            error={Boolean(errors.image)}
+          />
+          {errors.image && (
+            <FormHelperText error>{errors.image}</FormHelperText>
+          )}
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 3, backgroundColor: "black" }}>
+            הוסף קטגוריה
+          </Button>
+        </form>
+      </Box>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <SnackbarContent
+          sx={{
+            backgroundColor: snackbarType === "success" ? green[500] : red[500],
+            color: "#fff",
+          }}
+          message={snackbarMessage}
         />
-        <TextField
-          label="תמונה של הקטגוריה"
-          type="file"
-          inputProps={{ accept: "image/*" }}
-          onChange={handleImageChange}
-          fullWidth
-          margin="normal"
-        />
-        <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }}>
-          הוסף קטגוריה
-        </Button>
-      </form>
-    </Box>
+      </Snackbar>
+    </>
   );
 };
 

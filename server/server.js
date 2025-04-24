@@ -2,20 +2,29 @@ const express = require("express")
 const mongoose = require("mongoose");
 const cors = require("cors")
 
-const usersRouter = require('./Routs/usersRouter');
-const categoriesRouter = require('./Routs/categorieRouter');
-const recipesRouter = require('./Routs/recipeRouter');
-const responsesRouter = require('./Routs/responsesRouter');
+const usersRouter = require('./Routes/usersRouter');
+const categoriesRouter = require('./Routes/categorieRouter');
+const recipesRouter = require('./Routes/recipeRouter');
+const responsesRouter = require('./Routes/responsesRouter');
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/recipes')
+mongoose.connect('mongodb+srv://NataliUser:natali071205@cluster0.y68xpbl.mongodb.net/recipes?retryWrites=true&w=majority')
   .then(() => {
-    console.log('successfuly to connent DB!');
+    console.log('✅ Successfully connected to MongoDB Atlas!');
   })
   .catch((err) => {
-    console.error('Error not succesed to connect DB!', err);
-  })
+    console.error('❌ Error connecting to MongoDB Atlas:', err);
+  });
+
+
+// mongoose.connect('mongodb://localhost:27017/recipes')
+//   .then(() => {
+//     console.log('successfuly to connent DB!');
+//   })
+//   .catch((err) => {
+//     console.error('Error not succesed to connect DB!', err);
+//   })
 
 app.use(express.json());
 app.use(cors())

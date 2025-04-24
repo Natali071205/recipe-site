@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { Container, Grid, Typography, Card, CardContent, CardMedia, Box, IconButton } from '@mui/material';
@@ -14,6 +12,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp'; // Import ThumbUpIcon for likes
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -30,8 +29,9 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [poplarResipes, setPoplarResipes] = useState([]);
+  const [openSignupDialog, setOpenSignupDialog] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [openSignupDialog, setOpenSignupDialog] = useState(false); 
 
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
@@ -43,24 +43,22 @@ const Home = () => {
       })
       .catch(err => console.error(err));
 
-    axios.get('http://localhost:3000/recipes/popular')
+    axios.get('http://localhost:3000/recipes/recipesPopular')
       .then(response => {
-        setRecipes(response.data);
+        setPoplarResipes(response.data);
       })
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
 
- 
     const timer = setTimeout(() => {
-      if (!user && showDialog == false) {
+      if (!user && !showDialog) {
         setOpenSignupDialog(true);
-        setShowDialog(true)
+        setShowDialog(true);
       }
-
     }, 10000);
 
-    return () => clearTimeout(timer); 
-  }, []);
+    return () => clearTimeout(timer);
+  }, [user, showDialog]);
 
   if (loading) {
     return <div>טוען...</div>;
@@ -88,7 +86,7 @@ const Home = () => {
   };
 
   const handleSignupRedirect = () => {
-    navigate('/singup'); 
+    navigate('/signup');
     setOpenSignupDialog(false);
   };
 
@@ -130,8 +128,6 @@ const Home = () => {
             backgroundColor: "black", height: "1px",
             width: "100%", position: 'absolute', top: '23px',
             zIndex: '-1',
-            backgroundColor: 'black',
-            height: '1px',
           }}></div>
         <p style={{
           paddingRight: "18px",
@@ -198,14 +194,12 @@ const Home = () => {
         ))}
       </Grid>
 
-      <Typography variant="h4" gutterBottom style={{ textAlign: "center", position: "relative" }}>
+      <Typography variant="h4" gutterBottom style={{ textAlign: "center", position: "relative", top: "20px" }}>
         <div
           style={{
             backgroundColor: "black", height: "1px",
             width: "100%", position: 'absolute', top: '48px',
             zIndex: '-1',
-            backgroundColor: 'black',
-            height: '1px',
           }}></div>
         <p style={{
           position: 'relative',
@@ -218,30 +212,68 @@ const Home = () => {
         }}>מתכונים פופולרים</p>
       </Typography>
 
-      <Grid container spacing={4} justifyContent="center">
-        {recipes.map(recipe => (
-          <Grid item xs={12} sm={6} md={6} key={recipe._id}>
-            <Card>
+      <Grid container spacing={4} justifyContent="center" style={{ marginTop: '40px' }}>
+        {poplarResipes.map(recipe => (
+          <Grid item xs={12} sm={6} md={4} key={recipe._id}>
+            <Card
+              sx={{
+                boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.1)',
+                borderRadius: '16px',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0px 12px 30px rgba(0, 0, 0, 0.2)',
+                  filter: 'brightness(1.1)',
+                },
+                cursor: 'pointer',
+                overflow: 'hidden', 
+              }}
+              onClick={() => navigate(`/recipe/${recipe._id}`)}
+            >
               <CardMedia
                 component="img"
-                height="140"
+                height="200"
                 image={`http://localhost:3000${recipe.image}`}
                 alt={recipe.name}
+                style={{ objectFit: 'cover', borderRadius: '16px 16px 0 0' }} 
               />
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+              <CardContent sx={{ padding: '16px' }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: '1.2rem',
+                    color: '#333',
+                    textAlign: 'center',
+                    marginBottom: '10px',
+                  }}
+                >
                   {recipe.name}
                 </Typography>
+
+                <Box display="flex" justifyContent="flex-start" alignItems="center" style={{ gap: '8px' }}>
+                  <ThumbUpIcon style={{ fontSize: '1.5rem', color: 'black' }} />
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {recipe.likes}
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* דיאלוג ההרשמה */}
+      
       <BootstrapDialog
         onClose={handleCloseSignupDialog}
-        aria-labelledby="customized-dialog-title"
         open={openSignupDialog}
       >
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
@@ -274,7 +306,6 @@ const Home = () => {
         </DialogActions>
       </BootstrapDialog>
 
-      {/* דיאלוג מחיקת קטגוריה */}
       <Dialog
         open={openDialog}
         onClose={cancelDeleteCategory}
@@ -302,4 +333,3 @@ const Home = () => {
 };
 
 export default Home;
-
